@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net/url"
 	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -34,10 +36,23 @@ func main() {
 
 			wc := update.Message.NewChatMembers
 			if wc != nil {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "welcome to this group")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "welcome to test-bot group")
 				msg.ReplyToMessageID = update.Message.MessageID
 
 				bot.Send(msg)
+			}
+
+			//check the role of user who sent link if admin else delete the message
+			adminUser := update.Message.From.UserName
+			if adminUser != os.Getenv("USER_NAME") {
+				_, err := url.ParseRequestURI(update.Message.Text)
+				if err != nil {
+					fmt.Println("Message contains a link...")
+					deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+					bot.Send(deleteMsg)
+					fmt.Println("deleting message that contains link...")
+					fmt.Println(deleteMsg)
+				}
 			}
 
 			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
