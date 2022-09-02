@@ -3,11 +3,42 @@ package tele
 import (
 	"fmt"
 	"log"
-	"net/url"
 	"os"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+func urlChecker(character string) bool {
+	var val bool
+	//check if the string contains a .
+	if strings.Contains(character, ".") {
+		for i, value := range character {
+			//get the index of .
+			if string(value) == "." {
+				fmt.Printf("%d - %v\n", i, string(value))
+				prev := i - 1
+				next := i + 1
+				for e, v := range character {
+					//check the previous character if its an "" string
+					if e == prev {
+						if string(v) != " " {
+							//check the next character if its an "" string
+							for ee, vv := range character {
+								if ee == next {
+									if string(vv) != " " {
+										val = true
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return val
+}
 
 func Bot() {
 	token := os.Getenv("TOKEN")
@@ -26,22 +57,24 @@ func Bot() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message != nil { // If we got a message
+		if update.Message != nil {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
+			//welcome new users
 			wc := update.Message.NewChatMembers
 			if wc != nil {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "welcome to test-bot group")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "welcome to test-bot group. Please 30 people to be able to send messages in the group")
 				msg.ReplyToMessageID = update.Message.MessageID
 
 				bot.Send(msg)
 			}
 
-			//check the role of user who sent link if admin else delete the message
+			//delete messages that contains link sent by other users aside from the admin
+			// urls := urlChecker(update.Message.Text, ".")
 			adminUser := update.Message.From.UserName
 			if adminUser != os.Getenv("USER_NAME") {
-				_, err := url.ParseRequestURI(update.Message.Text)
-				if err != nil {
+				domain := urlChecker(update.Message.Text)
+				if domain {
 					fmt.Println("Message contains a link...")
 					deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 					bot.Send(deleteMsg)
