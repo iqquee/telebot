@@ -10,7 +10,6 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func DbInstance() *mongo.Client {
@@ -37,22 +36,25 @@ func DbInstance() *mongo.Client {
 var Client *mongo.Client = DbInstance()
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	if err := godotenv.Load(); err != nil {
+		log.Println("no env gotten")
+	}
 	databaseName := os.Getenv("DATABASE_NAME")
 	var collection *mongo.Collection = client.Database(databaseName).Collection(collectionName)
 	return collection
 }
 
-func GetMongoDoc(colName *mongo.Collection, filter interface{}) (bson.M, error) {
+func GetMongoDoc(colName *mongo.Collection, filter interface{}) (*AddedUsers, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var data bson.M
+	var data AddedUsers
 
 	if err := colName.FindOne(ctx, filter).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	return data, nil
+	return &data, nil
 }
 
 func CreateMongoDoc(colName *mongo.Collection, data interface{}) (*mongo.InsertOneResult, error) {

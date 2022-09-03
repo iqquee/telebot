@@ -1,12 +1,15 @@
 package tele
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/hisyntax/telebot/database"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func urlChecker(character string) bool {
@@ -59,6 +62,8 @@ func Bot() {
 	for update := range updates {
 		if update.Message != nil {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			up := update.Message
+			fmt.Printf("This is the received message... %v\n", up)
 
 			//welcome new users
 			wc := update.Message.NewChatMembers
@@ -69,8 +74,66 @@ func Bot() {
 				bot.Send(msg)
 
 				//new users should not be able to send messages to the group until they add 30 more persons to the group
-				addedUsers := []string{}
-				fmt.Println(addedUsers)
+
+				// check if the user was already added to the group before
+
+			}
+
+			//check if the recently added user already exists in the datatase
+			filter := bson.M{"from.username": update.Message.From.UserName}
+			res, _ := database.GetMongoDoc(database.UserCollection, filter)
+
+			//loop through the object to get the username of the just added user
+			var byt []map[string]interface{}
+			arr := res.NewChatMembers
+			jm, _ := json.Marshal(arr)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			json.Unmarshal(jm, &byt)
+			// ; err != nil {
+			// 	fmt.Println(err)
+			// }
+
+			//add _ number users to the group before being able to send messages to the group
+			var addedUsers database.AddedUsers
+			jsonr, _ := json.Marshal(up)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			json.Unmarshal(jsonr, &addedUsers)
+			// ; err != nil {
+			// 	fmt.Println(err)
+			// }
+
+			var newUser []map[string]interface{}
+			addedUserR := addedUsers.NewChatMembers
+			addedUserjson, _ := json.Marshal(addedUserR)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+			json.Unmarshal(addedUserjson, &newUser)
+			//  err != nil {
+			// 	fmt.Println(err)
+			// }
+
+			//so long newchatmembers object is not nil - it would ignore updated when a user is removed from the group
+			if addedUsers.NewChatMembers != nil {
+				for _, v := range newUser {
+					if v["username"] != "" {
+						for _, vv := range byt {
+							//check if the user have not been added to the group before
+							if vv["username"] != v["username"] {
+								//add the new user
+								insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
+								// if err != nil {
+								// 	fmt.Printf("Mongo db error: %v\n", err)
+								// }
+								fmt.Printf("Mongodb data created with ID: %v\n", insertID)
+							}
+						}
+					}
+				}
 			}
 
 			//delete messages that contains link sent by other users aside from the admin
