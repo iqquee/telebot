@@ -22,11 +22,11 @@ func urlChecker(character string) bool {
 				for e, v := range character {
 					//check the previous character if its an "" string
 					if e == prev {
-						if string(v) != " " {
+						if string(v) != " " && string(v) != "." {
 							//check the next character if its an "" string
 							for ee, vv := range character {
 								if ee == next {
-									if string(vv) != " " {
+									if string(vv) != " " && string(vv) != "." {
 										val = true
 									}
 								}
@@ -69,8 +69,11 @@ func Bot() {
 				bot.Send(msg)
 			}
 
+			//new users should not be able to send messages to the group until they add 30 more persons to the group
+			addedUsers := []string{}
+			fmt.Println(addedUsers)
+
 			//delete messages that contains link sent by other users aside from the admin
-			// urls := urlChecker(update.Message.Text, ".")
 			adminUser := update.Message.From.UserName
 			if adminUser != os.Getenv("USER_NAME") {
 				domain := urlChecker(update.Message.Text)
@@ -78,7 +81,7 @@ func Bot() {
 					fmt.Println("Message contains a link...")
 					deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 					bot.Send(deleteMsg)
-					fmt.Println("deleting message that contains link...")
+					fmt.Println("deleted message that contains link...")
 					fmt.Println(deleteMsg)
 				}
 			}
