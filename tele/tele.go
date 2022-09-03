@@ -67,11 +67,11 @@ func Bot() {
 				msg.ReplyToMessageID = update.Message.MessageID
 
 				bot.Send(msg)
-			}
 
-			//new users should not be able to send messages to the group until they add 30 more persons to the group
-			addedUsers := []string{}
-			fmt.Println(addedUsers)
+				//new users should not be able to send messages to the group until they add 30 more persons to the group
+				addedUsers := []string{}
+				fmt.Println(addedUsers)
+			}
 
 			//delete messages that contains link sent by other users aside from the admin
 			adminUser := update.Message.From.UserName
