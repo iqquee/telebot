@@ -191,8 +191,14 @@ func Bot() {
 					fmt.Println("Message contains a link...")
 					deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 					bot.Send(deleteMsg)
+
 					fmt.Println("deleted message that contains link...")
 					fmt.Println(deleteMsg)
+					//notify they user that links can't be sent to the group
+					sendMsg := fmt.Sprintf("@%s the message you sent contains a link in it. Links cannot be sent to this group :(", foundUser)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
+
+					bot.Send(msg)
 				}
 			}
 
