@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	// "github.com/hisyntax/telebot/tele"
 	// "github.com/gorilla/mux"
 
 	"github.com/hisyntax/telebot/tele"

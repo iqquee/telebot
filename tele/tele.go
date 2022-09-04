@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -202,4 +203,8 @@ func Bot() {
 			// bot.Send(msg)
 		}
 	}
+
+	mux := http.NewServeMux()
+	port := os.Getenv("PORT")
+	go http.ListenAndServe(":"+port, mux)
 }
