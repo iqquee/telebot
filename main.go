@@ -19,14 +19,13 @@ func main() {
 	}
 	r := mux.NewRouter()
 
-	for {
-		fmt.Printf("for loop running...\n")
-		r.HandleFunc("/", RunBot)
+	fmt.Printf("for loop running...\n")
+	r.HandleFunc("/", RunBot)
 
-		port := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 
-		http.ListenAndServe(":"+port, r)
-	}
+	http.ListenAndServe(":"+port, r)
+
 }
 
 func RunBot(w http.ResponseWriter, r *http.Request) {
