@@ -69,7 +69,7 @@ func CreateMongoDoc(colName *mongo.Collection, data interface{}) (*mongo.InsertO
 	return insertNum, nil
 }
 
-func CountCollection(colName *mongo.Collection, filter interface{}) int64 {
+func CountCollection(colName *mongo.Collection, filter interface{}) int {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	count, err := colName.CountDocuments(ctx, filter)
@@ -77,5 +77,5 @@ func CountCollection(colName *mongo.Collection, filter interface{}) int64 {
 	if err != nil {
 		return 0
 	}
-	return count
+	return int(count)
 }

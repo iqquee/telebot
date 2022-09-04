@@ -61,7 +61,9 @@ func Bot() {
 
 	for update := range updates {
 		if update.Message != nil {
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			log.Printf("[%s] %s\n", update.Message.From.UserName, update.Message.Text)
+
+			fmt.Printf("This is that message text gottent fron update: %s.........\n", update.Message.Text)
 
 			// THESE APPLIES TO EVERYONE IN THE GROUP EXCEPT THE ADMIN OF THE GROUP
 			foundUser := update.Message.From.UserName
@@ -84,54 +86,7 @@ func Bot() {
 							bot.Send(msg)
 						}
 					}
-
-					// check if the user was already added to the group before
-
 				}
-
-				// if update.Message != nil {
-				//check if user is not removed from the group and user is not added to the group
-				//every other messages should be deleted
-
-				// removeUser := update.Message.LeftChatMember.UserName // get the removed user
-				// var addUser bool
-				// fmt.Printf("%v.....\n", removeUser)
-				// fmt.Printf("%v.....\n", addUser)
-
-				// addUserUpdate := update.Message.NewChatMembers
-				// for i, v := range addUserUpdate {
-				// 	if i == 0 {
-				// 		fmt.Println(v)
-				// 		addUser = true
-				// 	}
-				// }
-				// var addedUser []map[string]string
-				// aUserJson, _ := json.Marshal(addUserUpdate)
-				// json.Unmarshal(aUserJson, &addedUser)
-				// for val := range addedUser {
-				// 	username := addedUser[val]["username"]
-				// 	addUser = username
-				// }
-
-				// 	if removeUser == "" {
-				// 		// check the database to get the number of users a particular user have added
-				// 		// to the group to know if they are eligible to send messages to the group in this case 30
-				// 		countFilter := bson.M{"from.username": update.Message.From.UserName}
-				// 		addedUserCount := database.CountCollection(database.UserCollection, countFilter)
-				// 		if addedUserCount < 2 {
-				// 			//delete the messages sent to the group by the user
-				// 			deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
-				// 			bot.Send(deleteMsg)
-
-				// 			fmt.Println(deleteMsg)
-				// 			//notify the users that that they need to add 30 people to the group
-				// 			sendMsg := fmt.Sprintf("@%s you need to add 30 users to be able to send messages to this group", foundUser)
-				// 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
-				// 			// msg.ReplyToMessageID = update.Message.MessageID
-				// 			bot.Send(msg)
-				// 		}
-				// 	}
-				// }
 
 				//check if the recently added user already exists in the datatase
 				filter := bson.M{"from.username": update.Message.From.UserName}
@@ -199,6 +154,32 @@ func Bot() {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 					bot.Send(msg)
+				} else { //if the messages sent to the group is not a link
+
+					//check if the text message sent is not empty
+					if update.Message.Text != "" {
+						//check if the user have already added _ number of users to the group
+						countFilter := bson.M{"from.username": update.Message.From.UserName}
+						addedUserCount := database.CountCollection(database.UserCollection, countFilter)
+						// addedUserCount := 2
+						fmt.Printf("This is the number of users you have added to the group %v\n....", addedUserCount)
+						userNum := 2
+						if addedUserCount < userNum {
+							// delete the messages sent to the group by the user
+							deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+							bot.Send(deleteMsg)
+
+							fmt.Println(deleteMsg)
+							//notify the users that that they need to add 30 people to the group
+							usersToAdd := userNum - addedUserCount
+							sendMsg := fmt.Sprintf("@%s you have only added %v user(s). You need to add %v more users to be able to send messages to this group", foundUser, addedUserCount, usersToAdd)
+							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
+							// msg.ReplyToMessageID = update.Message.MessageID
+							bot.Send(msg)
+						}
+					}
+
+					// and if not delete their message and tell them to first add _ numbers of users before they can send in messages
 				}
 			}
 
