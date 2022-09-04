@@ -131,13 +131,18 @@ func Bot() {
 						}
 					}
 				} else {
-					up := update.Message
-					var addedUsers database.AddedUsers
-					jsonr, _ := json.Marshal(up)
+					if update.Message.NewChatMembers != nil {
 
-					json.Unmarshal(jsonr, &addedUsers)
-					insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
-					fmt.Printf("Mongodb data created with ID: %v\n", insertID)
+						up := update.Message
+						var addedUsers database.AddedUsers
+						jsonr, _ := json.Marshal(up)
+
+						json.Unmarshal(jsonr, &addedUsers)
+						insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
+						fmt.Printf("Mongodb data created with ID: %v\n", insertID)
+
+					}
+
 				}
 
 				//delete messages that contains link sent by other users aside from the admin
@@ -161,32 +166,26 @@ func Bot() {
 						//check if the user have already added _ number of users to the group
 						countFilter := bson.M{"from.username": update.Message.From.UserName}
 						addedUserCount := database.CountCollection(database.UserCollection, countFilter)
-						// addedUserCount := 2
 						fmt.Printf("This is the number of users you have added to the group %v\n....", addedUserCount)
-						userNum := 2
+						userNum := 30
 						if addedUserCount < userNum {
-							// delete the messages sent to the group by the user
+							// delete the messages sent to the group by the user who have not added the set numbers of users
 							deleteMsg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 							bot.Send(deleteMsg)
 
 							fmt.Println(deleteMsg)
-							//notify the users that that they need to add 30 people to the group
+							// and if not delete their message and notify them to first add _ numbers of users before they can send in messages
 							usersToAdd := userNum - addedUserCount
-							sendMsg := fmt.Sprintf("@%s you have only added %v user(s). You need to add %v more users to be able to send messages to this group", foundUser, addedUserCount, usersToAdd)
+							sendMsg := fmt.Sprintf("@%s you have only added %v user(s). You need to add %v more user(s) to be able to send messages to this group", foundUser, addedUserCount, usersToAdd)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 							// msg.ReplyToMessageID = update.Message.MessageID
 							bot.Send(msg)
 						}
 					}
-
-					// and if not delete their message and tell them to first add _ numbers of users before they can send in messages
 				}
+
 			}
 
-			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			// msg.ReplyToMessageID = update.Message.MessageID
-
-			// bot.Send(msg)
 		}
 	}
 }
