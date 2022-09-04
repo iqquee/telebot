@@ -12,5 +12,5 @@ func main() {
 		log.Println(".env not found")
 	}
 
-	go tele.Bot()
+	tele.Bot()
 }
