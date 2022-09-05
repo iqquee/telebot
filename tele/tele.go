@@ -80,7 +80,17 @@ func Bot() {
 					for val := range byt {
 						if byt[val]["username"] != "" {
 							username := byt[val]["username"]
+
+							fmt.Printf("This is the username found %v.....\n", username)
 							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", username)
+							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
+
+							bot.Send(msg)
+						} else {
+							firstname := byt[val]["first_name"]
+
+							fmt.Printf("This is the firstname found %v.....\n", firstname)
+							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", firstname)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 							bot.Send(msg)
