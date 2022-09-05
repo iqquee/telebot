@@ -86,11 +86,19 @@ func Bot() {
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 							bot.Send(msg)
-						} else {
+						} else if byt[val]["first_name"] != "" {
 							firstname := byt[val]["first_name"]
 
 							fmt.Printf("This is the firstname found %v.....\n", firstname)
 							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", firstname)
+							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
+
+							bot.Send(msg)
+						} else {
+							lastname := byt[val]["last_name"]
+
+							fmt.Printf("This is the lastname found %v.....\n", lastname)
+							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", lastname)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 							bot.Send(msg)
@@ -99,8 +107,11 @@ func Bot() {
 				}
 
 				//check if the recently added user already exists in the datatase
-				filter := bson.M{"from.username": update.Message.From.UserName}
-				res, _ := database.GetMongoDoc(database.UserCollection, filter)
+				firstnamefilter := bson.M{"from.firstname": update.Message.From.FirstName}
+				res, _ := database.GetMongoDoc(database.UserCollection, firstnamefilter)
+
+				// firstnamefilter := bson.M{"from.firstname": update.Message.From.UserName}
+				// firstnameRes, _ := database.GetMongoDoc(database.UserCollection, firstnamefilter)
 				if res != nil {
 					//loop through the object to get the username of the just added user
 					var byt []map[string]interface{}
@@ -112,6 +123,7 @@ func Bot() {
 					//add _ number users to the group before being able to send messages to the group
 					up := update.Message
 					var addedUsers database.AddedUsers
+
 					jsonr, _ := json.Marshal(up)
 
 					json.Unmarshal(jsonr, &addedUsers)
@@ -125,10 +137,10 @@ func Bot() {
 					//so long newchatmembers object is not nil - it would ignore updated when a user is removed from the group
 					if addedUsers.NewChatMembers != nil {
 						for v := range newUser {
-							if newUser[v]["username"] != "" {
+							if newUser[v]["firstname"] != "" {
 								for vv := range byt {
 									//check if the user have not been added to the group before
-									if byt[vv]["username"] != newUser[v]["username"] {
+									if byt[vv]["firstname"] != newUser[v]["firstname"] {
 										//add the new user
 										insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
 										// if err != nil {
