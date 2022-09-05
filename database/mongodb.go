@@ -57,6 +57,24 @@ func GetMongoDoc(colName *mongo.Collection, filter interface{}) (*AddedUsers, er
 	return &data, nil
 }
 
+func GetMongoDocs(colName *mongo.Collection, filter interface{}, opts ...*options.FindOptions) (*[]AddedUsers, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var data []AddedUsers
+
+	filterCusor, err := colName.Find(ctx, filter, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := filterCusor.All(ctx, &data); err != nil {
+		return nil, err
+	}
+
+	return &data, nil
+}
+
 func CreateMongoDoc(colName *mongo.Collection, data interface{}) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

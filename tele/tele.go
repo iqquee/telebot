@@ -90,61 +90,15 @@ func Bot() {
 					}
 				}
 
-				//check if the recently added user already exists in the datatase
-				firstnamefilter := bson.M{"from.firstname": update.Message.From.FirstName}
-				res, err := database.GetMongoDoc(database.UserCollection, firstnamefilter)
-				if err == nil {
-					//loop through the object to get the username of the just added user
-					var byt []map[string]interface{}
-					arr := res.NewChatMembers
-					jm, _ := json.Marshal(arr)
+				if update.Message.NewChatMembers != nil {
 
-					json.Unmarshal(jm, &byt)
-
-					//add _ number users to the group before being able to send messages to the group
 					up := update.Message
 					var addedUsers database.AddedUsers
-
 					jsonr, _ := json.Marshal(up)
 
 					json.Unmarshal(jsonr, &addedUsers)
-
-					var newUser []map[string]interface{}
-					addedUserR := addedUsers.NewChatMembers
-					addedUserjson, _ := json.Marshal(addedUserR)
-
-					json.Unmarshal(addedUserjson, &newUser)
-
-					//so long newchatmembers object is not nil - it would ignore updated when a user is removed from the group
-					if addedUsers.NewChatMembers != nil {
-						for v := range newUser {
-							if newUser[v]["firstname"] != "" {
-								for vv := range byt {
-									//check if the user have not been added to the group before
-									if byt[vv]["firstname"] != newUser[v]["firstname"] {
-										//add the new user
-										insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
-										// if err != nil {
-										// 	fmt.Printf("Mongo db error: %v\n", err)
-										// }
-										fmt.Printf("Mongodb data created with ID: %v\n", insertID)
-									}
-								}
-							}
-						}
-					}
-				} else {
-					if update.Message.NewChatMembers != nil {
-
-						up := update.Message
-						var addedUsers database.AddedUsers
-						jsonr, _ := json.Marshal(up)
-
-						json.Unmarshal(jsonr, &addedUsers)
-						insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
-						fmt.Printf("Mongodb data created with ID: %v\n", insertID)
-
-					}
+					insertID, _ := database.CreateMongoDoc(database.UserCollection, addedUsers)
+					fmt.Printf("Mongodb data created with ID: %v\n", insertID)
 
 				}
 
