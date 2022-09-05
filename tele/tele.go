@@ -78,27 +78,11 @@ func Bot() {
 
 					json.Unmarshal(jsonM, &byt)
 					for val := range byt {
-						if byt[val]["username"] != "" {
-							username := byt[val]["username"]
-
-							fmt.Printf("This is the username found %v.....\n", username)
-							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", username)
-							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
-
-							bot.Send(msg)
-						} else if byt[val]["first_name"] != "" {
+						if byt[val]["first_name"] != "" {
 							firstname := byt[val]["first_name"]
 
 							fmt.Printf("This is the firstname found %v.....\n", firstname)
-							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", firstname)
-							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
-
-							bot.Send(msg)
-						} else {
-							lastname := byt[val]["last_name"]
-
-							fmt.Printf("This is the lastname found %v.....\n", lastname)
-							sendMsg := fmt.Sprintf("@%s welcome to test-bot group, we catch fun here :)", lastname)
+							sendMsg := fmt.Sprintf("Hi %s, Welcome to contact gain with EXODUS kindly add a minimum of 30 telegram user's to be able to drop your number and get verified into the VCF 🗃️ file, if you can't follow the process send a DM to @EXODUSTV to pay #500 and get verified to the VCF file", firstname)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 							bot.Send(msg)
@@ -108,11 +92,8 @@ func Bot() {
 
 				//check if the recently added user already exists in the datatase
 				firstnamefilter := bson.M{"from.firstname": update.Message.From.FirstName}
-				res, _ := database.GetMongoDoc(database.UserCollection, firstnamefilter)
-
-				// firstnamefilter := bson.M{"from.firstname": update.Message.From.UserName}
-				// firstnameRes, _ := database.GetMongoDoc(database.UserCollection, firstnamefilter)
-				if res != nil {
+				res, err := database.GetMongoDoc(database.UserCollection, firstnamefilter)
+				if err == nil {
 					//loop through the object to get the username of the just added user
 					var byt []map[string]interface{}
 					arr := res.NewChatMembers
@@ -167,6 +148,7 @@ func Bot() {
 
 				}
 
+				usersFirstname := update.Message.From.FirstName
 				//delete messages that contains link sent by other users aside from the admin
 				domain := urlChecker(update.Message.Text)
 				if domain {
@@ -177,7 +159,7 @@ func Bot() {
 					fmt.Println("deleted message that contains link...")
 					fmt.Println(deleteMsg)
 					//notify they user that links can't be sent to the group
-					sendMsg := fmt.Sprintf("@%s the message you sent contains a link in it. Links cannot be sent to this group :(", foundUser)
+					sendMsg := fmt.Sprintf("%s The message you sent contains a link or you failed to add a space after the full stop(.). Links cannot be sent to this group", usersFirstname)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 					bot.Send(msg)
@@ -186,7 +168,7 @@ func Bot() {
 					//check if the text message sent is not empty
 					if update.Message.Text != "" {
 						//check if the user have already added _ number of users to the group
-						countFilter := bson.M{"from.username": update.Message.From.UserName}
+						countFilter := bson.M{"from.firstname": update.Message.From.FirstName}
 						addedUserCount := database.CountCollection(database.UserCollection, countFilter)
 						fmt.Printf("This is the number of users you have added to the group %v\n....", addedUserCount)
 						userNum := 30
@@ -198,7 +180,7 @@ func Bot() {
 							fmt.Println(deleteMsg)
 							// and if not delete their message and notify them to first add _ numbers of users before they can send in messages
 							usersToAdd := userNum - addedUserCount
-							sendMsg := fmt.Sprintf("@%s you have only added %v user(s). You need to add %v more user(s) to be able to send messages to this group", foundUser, addedUserCount, usersToAdd)
+							sendMsg := fmt.Sprintf("%s you have only added %v user(s). You need to add %v more user(s) to be able to send messages to this group. If you can't follow the process send a DM to @EXODUSTV to pay #500 and get verified to the VCF file", usersFirstname, addedUserCount, usersToAdd)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 							// msg.ReplyToMessageID = update.Message.MessageID
 							bot.Send(msg)
