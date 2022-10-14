@@ -82,7 +82,7 @@ func Bot() {
 							firstname := byt[val]["first_name"]
 
 							fmt.Printf("This is the firstname found %v.....\n", firstname)
-							sendMsg := fmt.Sprintf("Hi %s, Welcome to contact gain with EXODUS kindly add a minimum of 30 telegram user's to be able to drop your number and get verified into the VCF 🗃️ file, if you can't follow the process send a DM to @EXODUSTV to pay #500 and get verified to the VCF file", firstname)
+							sendMsg := fmt.Sprintf("Hi %s, Welcome to contact gain with EXODUS kindly add a minimum of 30 telegram user's to be able to drop your number and get verified into the VCF 🗃️ file, if you can't follow the process send a DM to @EXODUSTV96 to pay #500 and get verified to the VCF file", firstname)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 
 							bot.Send(msg)
@@ -134,7 +134,7 @@ func Bot() {
 							fmt.Println(deleteMsg)
 							// and if not delete their message and notify them to first add _ numbers of users before they can send in messages
 							usersToAdd := userNum - addedUserCount
-							sendMsg := fmt.Sprintf("%s you have only added %v user(s). You need to add %v more user(s) to be able to send messages to this group. If you can't follow the process send a DM to @EXODUSTV to pay #500 and get verified to the VCF file", usersFirstname, addedUserCount, usersToAdd)
+							sendMsg := fmt.Sprintf("%s you have only added %v user(s). You need to add %v more user(s) to be able to send messages to this group. If you can't follow the process send a DM to @EXODUSTV96 to pay #500 and get verified to the VCF file", usersFirstname, addedUserCount, usersToAdd)
 							msg := tgbotapi.NewMessage(update.Message.Chat.ID, sendMsg)
 							// msg.ReplyToMessageID = update.Message.MessageID
 							bot.Send(msg)
