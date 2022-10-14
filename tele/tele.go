@@ -67,7 +67,7 @@ func Bot() {
 
 			// THESE APPLIES TO EVERYONE IN THE GROUP EXCEPT THE ADMIN OF THE GROUP
 			foundUser := update.Message.From.UserName
-			if foundUser != os.Getenv("USER_NAME") {
+			if foundUser != os.Getenv("USER_NAME1") || foundUser != os.Getenv("USER_NAME2") {
 
 				//welcome new users
 				wc := update.Message.NewChatMembers
