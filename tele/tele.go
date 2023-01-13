@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/hisyntax/telebot/database"
+	"github.com/iqquee/telebot/database"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
